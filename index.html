@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Costos de Impresión 3D</title>
+
+  <style>
+    :root {
+      --bg: #151515;
+      --bg-card: #1f1f1f;
+      --bg-input: #262626;
+      --accent: #c300ff;
+      --accent-soft: #c300ff88;
+      --text-main: #ffffff;
+      --text-muted: #bbbbbb;
+      --text-strong: #ffea00;
+      --border: #3b3b3b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #2b0040 0, #050505 55%);
+      color: var(--text-main);
+      font-family: Arial, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 24px 16px 40px;
+      font-size: 18px;
+      line-height: 1.5;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 32px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    h2 {
+      color: var(--accent);
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 22px;
+    }
+
+    .card {
+      background: linear-gradient(135deg, #1b1b1b 0%, #101010 100%);
+      padding: 18px 16px 20px;
+      margin-bottom: 18px;
+      border-radius: 14px;
+      border: 1px solid #292929;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.65);
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 2px;
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 4px;
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 17px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+      background: #2f2f2f;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px 16px;
+    }
+
+    button {
+      display: block;
+      margin: 10px auto 0;
+      background: linear-gradient(135deg, var(--accent) 0%, #ff00c8 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 26px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 0 18px var(--accent-soft);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 24px var(--accent-soft);
+      filter: brightness(1.05);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 0 10px var(--accent-soft);
+      filter: brightness(0.96);
+    }
+
+    .result {
+      background: #050505;
+      padding: 18px 16px 22px;
+      border-radius: 14px;
+      border: 1px solid #393939;
+      margin-top: 22px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+      font-size: 17px;
+    }
+
+    .result h2 {
+      margin-bottom: 8px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px dashed #333;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: var(--text-muted);
+    }
+
+    .value {
+      font-weight: 600;
+    }
+
+    .highlight {
+      color: var(--text-strong);
+      font-weight: 700;
+    }
+
+    .section-title {
+      margin-top: 10px;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #e0e0e0;
+    }
+
+    .totales {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #333;
+    }
+
+    .important {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 16px 10px 30px;
+        font-size: 16px;
+      }
+      h1 {
+        font-size: 26px;
+      }
+      h2 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculadora de Impresión 3D</h1>
+    <div class="subtitle">Calculá tus costos reales de impresión y el precio sugerido de venta.</div>
+
+    <!-- GASTOS FIJOS -->
+    <div class="card">
+      <h2>Gastos Fijos</h2>
+
+      <label for="precioKg">Precio KG (ARS $):</label>
+      <input id="precioKg" type="number" value="22000">
+
+      <label for="precioKwh">Precio kWh (ARS $):</label>
+      <input id="precioKwh" type="number" value="300">
+
+      <label for="consumoW">Consumo real por hora (W):</label>
+      <input id="consumoW" type="number" value="120">
+
+      <label for="desgasteHs">Desgaste máquina (horas):</label>
+      <input id="desgasteHs" type="number" value="4320">
+
+      <label for="precioRepuestos">Precio Repuestos (ARS $):</label>
+      <input id="precioRepuestos" type="number" value="150000">
+
+      <label for="margenError">% Margen de Error:</label>
+      <input id="margenError" type="number" value="30">
+    </div>
+
+    <!-- PIEZA -->
+    <div class="card">
+      <h2>Pieza</h2>
+
+      <div class="grid-2">
+        <div>
+          <label for="horasPrint">Horas de impresión:</label>
+          <input id="horasPrint" type="number" value="0">
+        </div>
+
+        <div>
+          <label for="minPrint">Minutos de impresión:</label>
+          <input id="minPrint" type="number" value="0">
+        </div>
+      </div>
+
+      <label for="gramos">Gramos de filamento:</label>
+      <input id="gramos" type="number" value="95">
+
+      <label for="insumos">Insumos adicionales (ARS $):</label>
+      <input id="insumos" type="number" value="0">
+
+      <label for="unidades">Cantidad de unidades:</label>
+      <input id="unidades" type="number" value="1">
+    </div>
+
+    <!-- GANANCIA -->
+    <div class="card">
+      <h2>Ganancia</h2>
+      <label for="multiplicador">Margen de ganancia (multiplicador):</label>
+      <input id="multiplicador" type="number" value="5">
+      <div class="subtitle" style="margin-top:8px;">
+        <span class="important">Referencias:</span> Minorista ≈ 4 · Mayorista ≈ 3 · Llaveros ≈ 5
+      </div>
+    </div>
+
+    <button onclick="calcular()">Calcular</button>
+
+    <div id="resultado" class="result" style="display:none"></div>
+  </div>
+
+  <script>
+    function getNumber(id, defaultValue = 0) {
+      const el = document.getElementById(id);
+      const value = parseFloat(el.value);
+      return isNaN(value) ? defaultValue : value;
+    }
+
+    function calcular() {
+      // Leer inputs
+      const precioKg        = getNumber("precioKg");
+      const precioKwh       = getNumber("precioKwh");
+      const consumoW        = getNumber("consumoW");
+      const desgasteHs      = getNumber("desgasteHs");
+      const precioRepuestos = getNumber("precioRepuestos");
+      const margenErrorPerc = getNumber("margenError") / 100;
+
+      const horasImp        = getNumber("horasPrint");
+      const minsImp         = getNumber("minPrint");
+      const gramos          = getNumber("gramos");
+      const insumosVal      = getNumber("insumos");
+      const multiplicador   = getNumber("multiplicador", 1);
+
+      let unidades = parseInt(document.getElementById("unidades").value, 10);
+      if (isNaN(unidades) || unidades < 1) unidades = 1;
+
+      const horasTotales = horasImp + minsImp / 60;
+
+      // Cálculos de costos
+      const precioMaterial   = (precioKg / 1000) * gramos;
+      const precioLuz        = (consumoW / 1000) * horasTotales * precioKwh;
+      const desgasteMaquina  = (precioRepuestos / desgasteHs) * horasTotales;
+      const margenErrorCalc  = (precioMaterial + precioLuz + desgasteMaquina) * margenErrorPerc;
+
+      const subtotalSinInsumos = precioMaterial + precioLuz + desgasteMaquina + margenErrorCalc;
+
+      // Precio final
+      const precioUnidad = subtotalSinInsumos * multiplicador + insumosVal;
+      const totalGeneral = precioUnidad * unidades;
+
+      // Precio sugerido ML (ej: 80% extra comisiones/envío/impuestos)
+      const precioMercadoLibre = precioUnidad * 1.8;
+
+      const resultado = document.getElementById("resultado");
+      resultado.style.display = "block";
+
+      resultado.innerHTML = `
+        <h2>Resultados</h2>
+
+        <div class="section-title">Costos base por unidad</div>
+        <div class="result-row">
+          <span class="label">Precio material:</span>
+          <span class="value">ARS $ ${precioMaterial.toFixed(2)}</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Precio luz:</span>
+          <span class="value">ARS $ ${precioLuz.toFixed(2)}</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Desgaste máquina:</span>
+          <span class="value">ARS $ ${desgasteMaquina.toFixed(2)}</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Margen de error:</span>
+          <span class="value">ARS $ ${margenErrorCalc.toFixed(2)}</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Insumos:</span>
+          <span class="value">ARS $ ${insumosVal.toFixed(2)}</span>
+        </div>
+
+        <div class="totales">
+          <div class="result-row">
+            <span class="label">Subtotal sin insumos:</span>
+            <span class="value">ARS $ ${subtotalSinInsumos.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <div class="section-title">Precios</div>
+        <div class="result-row">
+          <span class="label important">Precio por unidad:</span>
+          <span class="value highlight">ARS $ ${precioUnidad.toFixed(2)}</span>
+        </div>
+        <div class="result-row">
+          <span class="label important">Total por ${unidades} unidades:</span>
+          <span class="value highlight">ARS $ ${totalGeneral.toFixed(2)}</span>
+        </div>
+
+        <div class="section-title">Referencia MercadoLibre</div>
+        <div class="result-row">
+          <span class="label">Precio sugerido ML (aprox.):</span>
+          <span class="value highlight">ARS $ ${precioMercadoLibre.toFixed(2)}</span>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
