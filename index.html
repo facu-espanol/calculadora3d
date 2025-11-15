@@ -306,7 +306,7 @@
       const subtotalLoteConInsumos = totalSubtotalSinInsumos + insumosVal;
 
       // ---- PRECIO FINAL ----
-      const precioUnidad = subtotalSinInsumos * multiplicador + insumosUnidad;
+      const precioUnidad = (subtotalSinInsumos + insumosUnidad) * multiplicador;
       const totalGeneral = precioUnidad * unidades;
 
       const precioMercadoLibre = precioUnidad * 1.8;
