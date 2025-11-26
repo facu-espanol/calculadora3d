@@ -261,7 +261,6 @@
       const value = parseFloat(el.value);
       return isNaN(value) ? defaultValue : value;
     }
-
     function calcular() {
 
       const precioKg = getNumber("precioKg");
@@ -282,110 +281,72 @@
 
       const horasTotales = horasImp + minsImp / 60;
 
-      // ---- CALCULOS DE LOTE ----
-      const totalMaterial = (precioKg / 1000) * gramos;
-      const totalLuz = (consumoW / 1000) * horasTotales * precioKwh;
+      // --------------- COSTOS POR LOTE --------------------
+
+      const totalMaterial = (precioKg / 1000) * gramos;                  // material total
+      const totalLuz = (consumoW / 1000) * horasTotales * precioKwh;    // luz total
       const totalDesgaste = (precioRepuestos / desgasteHs) * horasTotales;
       const totalMargenErr = (totalMaterial + totalLuz + totalDesgaste) * margenErrorPerc;
 
-      const totalSubtotalSinInsumos = totalMaterial + totalLuz + totalDesgaste + totalMargenErr;
+      const subtotalLoteSinInsumos =
+        totalMaterial + totalLuz + totalDesgaste + totalMargenErr;
 
-      // ---- POR UNIDAD ----
+      const subtotalLoteConInsumos = subtotalLoteSinInsumos + insumosVal;
+
+      // --------------- COSTOS POR UNIDAD --------------------
+
       const precioMaterial = totalMaterial / unidades;
       const precioLuz = totalLuz / unidades;
       const desgasteMaquina = totalDesgaste / unidades;
       const margenErrorCalc = totalMargenErr / unidades;
-      const subtotalSinInsumos = totalSubtotalSinInsumos / unidades;
-
       const insumosUnidad = insumosVal / unidades;
 
-      // ---- NUEVOS SUBTOTALES ----
-      const subtotalConInsumos = subtotalSinInsumos + insumosUnidad;
+      const subtotalSinInsumos = subtotalLoteSinInsumos / unidades;
+      const subtotalConInsumos = subtotalLoteConInsumos / unidades;
 
-      const subtotalLoteSinInsumos = totalSubtotalSinInsumos;
-      const subtotalLoteConInsumos = totalSubtotalSinInsumos + insumosVal;
+      // --------------- PRECIO FINAL --------------------
 
-      // ---- PRECIO FINAL ----
-      const precioUnidad = (subtotalSinInsumos + insumosUnidad) * multiplicador;
+      const precioUnidad = subtotalConInsumos * multiplicador;
       const totalGeneral = precioUnidad * unidades;
 
       const precioMercadoLibre = precioUnidad * 1.8;
+
+      // --------------- MOSTRAR RESULTADO --------------------
 
       const resultado = document.getElementById("resultado");
       resultado.style.display = "block";
 
       resultado.innerHTML = `
-      <h2>Resultados</h2>
+    <h2>Resultados</h2>
 
-      <div class="section-title">Costos base por unidad</div>
+    <div class="section-title">Costos base por unidad</div>
 
-      <div class="result-row">
-        <span class="label">Precio material:</span>
-        <span class="value">ARS $ ${precioMaterial.toFixed(2)}</span>
-      </div>
+    <div class="result-row"><span class="label">Precio material:</span><span class="value">ARS $ ${precioMaterial.toFixed(2)}</span></div>
+    <div class="result-row"><span class="label">Precio luz:</span><span class="value">ARS $ ${precioLuz.toFixed(2)}</span></div>
+    <div class="result-row"><span class="label">Desgaste máquina:</span><span class="value">ARS $ ${desgasteMaquina.toFixed(2)}</span></div>
+    <div class="result-row"><span class="label">Margen de error:</span><span class="value">ARS $ ${margenErrorCalc.toFixed(2)}</span></div>
+    <div class="result-row"><span class="label">Insumos:</span><span class="value">ARS $ ${insumosUnidad.toFixed(2)}</span></div>
 
-      <div class="result-row">
-        <span class="label">Precio luz:</span>
-        <span class="value">ARS $ ${precioLuz.toFixed(2)}</span>
-      </div>
+    <div class="result-row"><span class="label">Subtotal sin insumos (unidad):</span><span class="value">ARS $ ${subtotalSinInsumos.toFixed(2)}</span></div>
 
-      <div class="result-row">
-        <span class="label">Desgaste máquina:</span>
-        <span class="value">ARS $ ${desgasteMaquina.toFixed(2)}</span>
-      </div>
+    <div class="result-row"><span class="label">Subtotal con insumos (unidad):</span><span class="value highlight">ARS $ ${subtotalConInsumos.toFixed(2)}</span></div>
 
-      <div class="result-row">
-        <span class="label">Margen de error:</span>
-        <span class="value">ARS $ ${margenErrorCalc.toFixed(2)}</span>
-      </div>
+    <div class="section-title">Subtotales por lote</div>
 
-      <div class="result-row">
-        <span class="label">Insumos:</span>
-        <span class="value">ARS $ ${insumosUnidad.toFixed(2)}</span>
-      </div>
+    <div class="result-row"><span class="label">Subtotal sin insumos (lote):</span><span class="value">ARS $ ${subtotalLoteSinInsumos.toFixed(2)}</span></div>
+    <div class="result-row"><span class="label">Subtotal con insumos (lote):</span><span class="value highlight">ARS $ ${subtotalLoteConInsumos.toFixed(2)}</span></div>
 
-      <div class="result-row">
-        <span class="label">Subtotal sin insumos (unidad):</span>
-        <span class="value">ARS $ ${subtotalSinInsumos.toFixed(2)}</span>
-      </div>
+    <div class="section-title">Precios</div>
 
-      <div class="result-row">
-        <span class="label">Subtotal con insumos (unidad):</span>
-        <span class="value highlight">ARS $ ${subtotalConInsumos.toFixed(2)}</span>
-      </div>
+    <div class="result-row"><span class="label important">Precio por unidad:</span><span class="value highlight">ARS $ ${precioUnidad.toFixed(2)}</span></div>
+    <div class="result-row"><span class="label important">Total por ${unidades} unidades:</span><span class="value highlight">ARS $ ${totalGeneral.toFixed(2)}</span></div>
 
-      <div class="section-title">Subtotales por lote</div>
+    <div class="section-title">Referencia MercadoLibre</div>
 
-      <div class="result-row">
-        <span class="label">Subtotal sin insumos (lote):</span>
-        <span class="value">ARS $ ${subtotalLoteSinInsumos.toFixed(2)}</span>
-      </div>
-
-      <div class="result-row">
-        <span class="label">Subtotal con insumos (lote):</span>
-        <span class="value highlight">ARS $ ${subtotalLoteConInsumos.toFixed(2)}</span>
-      </div>
-
-      <div class="section-title">Precios</div>
-
-      <div class="result-row">
-        <span class="label important">Precio por unidad:</span>
-        <span class="value highlight">ARS $ ${precioUnidad.toFixed(2)}</span>
-      </div>
-
-      <div class="result-row">
-        <span class="label important">Total por ${unidades} unidades:</span>
-        <span class="value highlight">ARS $ ${totalGeneral.toFixed(2)}</span>
-      </div>
-
-      <div class="section-title">Referencia MercadoLibre</div>
-
-      <div class="result-row">
-        <span class="label">Precio sugerido ML (aprox.):</span>
-        <span class="value highlight">ARS $ ${precioMercadoLibre.toFixed(2)}</span>
-      </div>
-      `;
+    <div class="result-row"><span class="label">Precio sugerido ML (aprox.):</span><span class="value highlight">ARS $ ${precioMercadoLibre.toFixed(2)}</span></div>
+  `;
     }
+
   </script>
 </body>
 
